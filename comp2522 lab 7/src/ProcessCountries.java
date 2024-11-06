@@ -3,8 +3,11 @@ import java.nio.file.Paths;
 import java.nio.file.Files;
 import java.io.BufferedReader;
 import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class ProcessCountries {
@@ -17,15 +20,15 @@ public class ProcessCountries {
 
     private static final int COUNTRY_MIN_CHAR_LENGTH = 5;
 
+    private static final String OVERWRITE_FILE_CONTENT_EMPTY = "";
+
     public static void main(final String[] args) throws java.io.IOException
     {
         final Path inputFilePath;
+        final Path outputFilePath;
+        final Path outputDirectoryPath;
 
-        final Path outputFile;
-        final Path outputDirectory;
         final List<String> countries;
-
-        final Path subDirPath;
 
         countries = new ArrayList<>();
 
@@ -36,7 +39,7 @@ public class ProcessCountries {
 
         if (Files.exists(inputFilePath)) {
 
-            // Using try-with-resources - to be auto-closed, resource needs to be declared inside try block
+            // Using try-with-resources (large file) - to be auto-closed, resource needs to be declared inside try block
             try (final BufferedReader br = Files.newBufferedReader(inputFilePath))
             {
                 String currentLine;
@@ -57,65 +60,50 @@ public class ProcessCountries {
             }
         }
 
-        outputDirectory = Paths.get(OUTPUT_DIRECTORY);
-        outputFile = Paths.get(OUTPUT_FILE);
+        outputDirectoryPath = Paths.get(OUTPUT_DIRECTORY);
+        outputFilePath = Paths.get(OUTPUT_FILE);
 
-        if (Files.notExists(outputDirectory))
+        if (Files.notExists(outputDirectoryPath))
         {
-            Files.createDirectory(outputDirectory);
+            Files.createDirectory(outputDirectoryPath);
         }
         else
         {
             System.out.println("Output directory already exists.");
         }
 
-        if (Files.notExists(outputFile))
+        if (Files.notExists(outputFilePath))
         {
-            Files.createFile(outputFile);
+            Files.createFile(outputFilePath);
         }
         else {
             System.out.println("Output file already exists.");
         }
 
-        //TODO:
-        // - Write results into file "data.txt" within the "matches" directory.
-        // - Write to "data.txt": For each of the 16 requirements below, use stream processing to
-        // - filter, map, or reduce the list of countries as needed, and write the results to "data.txt" in the
-        // "matches" directory.
+        // Overwrite the file contents from the previous main method run output
+        Files.writeString(outputFilePath, OVERWRITE_FILE_CONTENT_EMPTY, StandardOpenOption.TRUNCATE_EXISTING);
 
-        //TODO:
-        // Req step 1: need to overwrite the file contents from the previous output - see slide 10 Files.write method
+        // Use "Stream" and "filter" operations on the list of countries to meet specific criteria:
 
-        // Use "Stream" and "filter" operations on the list of countries to meet specific criteria.
-
-            //1. Long Country Names: Write "Country names longer than 10 characters:" followed by all
-            //   country names with more than 10 characters (always one country per line).
-
-        //TODO:
-        // write "Country names longer than 10 characters:" to  file "data.txt"
-        filteredStream(countries)
-                .filter(country -> country.length() > COUNTRY_MAX_CHAR_LENGTH);
-        //TODO: ^
-        // Req step 2 (for each of the 16 stream/filter operations listed below):
+        // For each of the 16 stream/filter operations listed below:
+        // - use stream processing to filter, map, or reduce the list of countries based on conditions
         // - collect filtered stream into data collection (arraylist)
-            // List<String> filteredCountries;
-            // filteredCountries = new ArrayList<>();
-            // filteredCountries = ... (see collect method)
-        // - write to file file "data.txt" - slide 10 - with NO OVERWRITE
+        // - write to file OUTPUT_FILE with no overwrite
 
-        System.out.println("------------------------------------------------------------------------");
+            //1. Long Country Names:
+                // Write "Country names longer than 10 characters:" followed by all
+                // country names with more than 10 characters (one country per line).
+            writeFileLongCountryNames(countries, outputFilePath);
 
-            //2. Short Country Names: Write "Country names shorter than 5 characters:" followed by all
-            //   country names with fewer than 5 characters.
+            Files.writeString(outputFilePath, System.lineSeparator(), StandardOpenOption.APPEND);
 
-        //TODO:
-        // write "Country names shorter than 5 characters:" to  file "data.txt"
-        filteredStream(countries)
-                .filter(country -> country.length() < COUNTRY_MIN_CHAR_LENGTH);
-        //TODO: ^
-        // same as req step 2
+            //2. Short Country Names:
+                // Write "Country names shorter than 5 characters:" followed by all
+                // country names with fewer than 5 characters.
+            writeFileShortCountryNames(countries, outputFilePath);
 
-        System.out.println("------------------------------------------------------------------------");
+    //TODO: below functions
+
             //3. Starting with "A": List all country names that start with the letter "A".
         System.out.println("------------------------------------------------------------------------");
             //4. Ending with "land": List all country names that end with "land".
@@ -147,6 +135,48 @@ public class ProcessCountries {
             //    otherwise, "false".
         System.out.println("------------------------------------------------------------------------");
 
+    }
+
+    private static void writeFileLongCountryNames(final List<String> countries, final Path outputFilePath)
+            throws IOException
+    {
+        // For storing filteredCountriesList
+        // Not to be changed
+        final List<String> filteredCountriesList;
+
+        //1. Long Country Names:
+        // Write "Country names longer than 10 characters:" followed by all
+        // country names with more than 10 characters (always one country per line).
+
+        // write "Country names longer than 10 characters:" to file with path outputFilePath
+
+        Files.writeString(outputFilePath, "Country names longer than 10 characters:" + System.lineSeparator(), StandardOpenOption.APPEND);
+
+        filteredCountriesList = filteredStream(countries)
+                .filter(country -> country.length() > COUNTRY_MAX_CHAR_LENGTH)
+                .collect(Collectors.toList());
+
+        // Output filtered country list to file
+        Files.write(outputFilePath, filteredCountriesList, StandardOpenOption.APPEND);
+
+        // Clear ArrayList
+        filteredCountriesList.clear();
+    }
+
+    private static void writeFileShortCountryNames(final List<String> countries, Path outputFilePath)
+    {
+        //TODO
+        //2. Short Country Names:
+        // Write "Country names shorter than 5 characters:" followed by all
+        // country names with fewer than 5 characters.
+
+        //        Files.writeString(outputFilePath, "Country names shorter than 5 characters:" + System.lineSeparator(), StandardOpenOption.APPEND);
+        //
+        //        filteredCountriesList = filteredStream(countries)
+        //                .filter(country -> country.length() < COUNTRY_MIN_CHAR_LENGTH)
+        //                .toList();
+        //
+        //        Files.write(outputFilePath, filteredCountriesList, StandardOpenOption.APPEND);
     }
 
     private static Stream<String> filteredStream(final List<String> countries)
