@@ -1,3 +1,5 @@
+package ca.bcit.comp2522.CountryLab;
+
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.nio.file.Files;
@@ -11,8 +13,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.Optional;
 
-public class ProcessCountries {
-    private static final String INPUT_FILE = "src/week8countries.txt";
+public class CountryLab {
+    private static final String INPUT_FILE = "src/ca/bcit/comp2522/CountryLab/week8countries.txt";
     private static final String OUTPUT_DIRECTORY = "src/matches";
     private static final String OUTPUT_FILE = "src/matches/data.txt";
 
@@ -30,6 +32,8 @@ public class ProcessCountries {
     private static final String LINEBREAK_LINE = "---------------------------------------------------------";
 
     private static final int MAX_COUNTRY_NAME_LENGTH = 3;
+
+    private static final int TITLE_STARTING_INDEX = 1;
 
     public static void main(final String[] args) throws java.io.IOException
     {
@@ -100,6 +104,8 @@ public class ProcessCountries {
         // - collect filtered stream into data collection (arraylist)
         // - write to file OUTPUT_FILE with no overwrite
 
+        int titleNumber = TITLE_STARTING_INDEX;
+
         //1V. Long Country Names:
                 // Write "Country names longer than 10 characters:" followed by all
                 // country names with more than 10 characters (one country per line).
@@ -107,8 +113,9 @@ public class ProcessCountries {
                 .filter(country -> country.length() > COUNTRY_MAX_CHAR_LENGTH)
                 .collect(Collectors.toList());
 
-        addTitleAndLinebreak(outputFilePath,"1. Country names longer than 10 characters:" );
+        addTitleAndLinebreak(outputFilePath, titleNumber, "Country names longer than 10 characters:" );
         Files.write(outputFilePath, filteredCountriesList, StandardOpenOption.APPEND);
+        titleNumber++;
 
             //2J. Short Country Names:
                 // Write "Country names shorter than 5 characters:" followed by all
@@ -117,39 +124,44 @@ public class ProcessCountries {
                 .filter(country -> country.length() < COUNTRY_MIN_CHAR_LENGTH)
                 .toList();
 
-        addTitleAndLinebreak(outputFilePath,"2. Country names shorter than 5 characters:" );
+        addTitleAndLinebreak(outputFilePath, titleNumber, "Country names shorter than 5 characters:" );
         Files.write(outputFilePath, filteredCountriesList, StandardOpenOption.APPEND);
+        titleNumber++;
 
             //3V. Starting with "A": List all country names that start with the letter "A".
         filteredCountriesList = filteredStream(countries)
                 .filter(country -> country.startsWith("A"))
                 .collect(Collectors.toList());
 
-        addTitleAndLinebreak(outputFilePath,"3. Country names that start with the letter \"A\":");
+        addTitleAndLinebreak(outputFilePath, titleNumber, "Country names starting with 'A':");
         Files.write(outputFilePath, filteredCountriesList, StandardOpenOption.APPEND);
+        titleNumber++;
 
             //4J. Ending with "land": List all country names that end with "land".
         filteredCountriesList = filteredStream(countries)
                 .filter(country -> country.endsWith("land"))
                 .collect(Collectors.toList());
 
-        addTitleAndLinebreak(outputFilePath,"4. All country names that end with \"Land\":");
+        addTitleAndLinebreak(outputFilePath, titleNumber, "All country names that end with \"Land\":");
         Files.write(outputFilePath, filteredCountriesList, StandardOpenOption.APPEND);
+        titleNumber++;
 
             //5V. Containing "United": List all countries containing the word "United".
         filteredCountriesList = filteredStream(countries)
                 .filter(country -> country.contains("United"))
                 .collect(Collectors.toList());
 
-        addTitleAndLinebreak(outputFilePath,"5. All countries containing the word \"United\":");
+        addTitleAndLinebreak(outputFilePath, titleNumber, "All countries containing the word \"United\":");
         Files.write(outputFilePath, filteredCountriesList, StandardOpenOption.APPEND);
+        titleNumber++;
 
             //6J. Sorted Names (Ascending): List all country names in alphabetical order.
         filteredCountriesList = filteredStream(countries)
                 .sorted()
                 .collect(Collectors.toList());
-        addTitleAndLinebreak(outputFilePath,"6. All country names in alphabetical order:");
+        addTitleAndLinebreak(outputFilePath, titleNumber, "All country names in alphabetical order:");
         Files.write(outputFilePath, filteredCountriesList, StandardOpenOption.APPEND);
+        titleNumber++;
 
 //        //7V. Sorted Names (Descending): List all country names in reverse alphabetical order.
 //        filteredCountriesList = filteredStream(countries)
@@ -164,8 +176,9 @@ public class ProcessCountries {
                 .map(country -> country.substring(ZERO_INDEX, FIRST_INDEX))
                 .collect(Collectors.toList());
 
-        addTitleAndLinebreak(outputFilePath,"7. List the unique first letters of all country names:");
+        addTitleAndLinebreak(outputFilePath, titleNumber, "List the unique first letters of all country names:");
         Files.write(outputFilePath, filteredCountriesList, StandardOpenOption.APPEND);
+        titleNumber++;
 
             //9V. Count of Countries: Write the total count of country names.
         final int totalCountryCount;
@@ -175,46 +188,51 @@ public class ProcessCountries {
         totalCountryCount = filteredCountriesList.size();
         totalCountryCountString = "" + totalCountryCount;
 
-        addTitleAndLinebreak(outputFilePath,"8. The total amount of country names:");
+        addTitleAndLinebreak(outputFilePath, titleNumber, "The total amount of country names:");
         Files.writeString(outputFilePath, totalCountryCountString, StandardOpenOption.APPEND);
-        
-            //10J. Longest Country Name: Write the longest country name.
+        titleNumber++;
+
+        //10J. Longest Country Name: Write the longest country name.
         final Optional<String> longestCountryName;
 
         longestCountryName = filteredStream(countries)
                 .max(Comparator.comparing(String::length));
 
-        addTitleAndLinebreak(outputFilePath,"9. The total amount of country names:");
+        addTitleAndLinebreak(outputFilePath, titleNumber, "The total amount of country names:");
 
         if (longestCountryName.isPresent())
         {
             Files.writeString(outputFilePath, totalCountryCountString, StandardOpenOption.APPEND);
         }
+        titleNumber++;
 
-            //11V. Shortest Country Name: Write the shortest country name.
+        //11V. Shortest Country Name: Write the shortest country name.
         final Optional<String> shortestCountryName;
         shortestCountryName = Optional.of(String.valueOf(countries));
 
-        addTitleAndLinebreak(outputFilePath,"10. The shortest country name is:");
+        addTitleAndLinebreak(outputFilePath, titleNumber, "The shortest country name is:");
         Files.write(outputFilePath, filteredCountriesList, StandardOpenOption.APPEND);
+        titleNumber++;
 
             //12V. Names in Uppercase: Write all country names converted to uppercase.
         filteredCountriesList = filteredStream(countries)
                 .map(String::toUpperCase)
                 .collect(Collectors.toList());
 
-        addTitleAndLinebreak(outputFilePath,"11. All countries in UPPERCASE:");
+        addTitleAndLinebreak(outputFilePath, titleNumber, "All countries in UPPERCASE:");
         Files.write(outputFilePath, filteredCountriesList, StandardOpenOption.APPEND);
+        titleNumber++;
         
             //13V. Countries with More Than One Word: List all country names with more than one word.
         filteredCountriesList = filteredStream(countries)
                 .filter(country -> country.contains(" "))
                 .collect(Collectors.toList());
 
-        addTitleAndLinebreak(outputFilePath,"12. All countries in UPPERCASE:");
+        addTitleAndLinebreak(outputFilePath, titleNumber, "All countries in UPPERCASE:");
 
-        addTitleAndLinebreak(outputFilePath,"13. All countries that have more than one word:");
+        addTitleAndLinebreak(outputFilePath, titleNumber, "All countries that have more than one word:");
         Files.write(outputFilePath, filteredCountriesList, StandardOpenOption.APPEND);
+        titleNumber++;
 
             //14J. Country Names to Character Count: Map each country name to its character count,
             //    writing each name and count as "Country: X characters".
@@ -222,8 +240,9 @@ public class ProcessCountries {
                 .map(country -> country + ": " + country.length() + " characters")
                 .collect(Collectors.toList());
 
-        addTitleAndLinebreak(outputFilePath,"14. All country names to Character Count:");
+        addTitleAndLinebreak(outputFilePath, titleNumber, "All country names to Character Count:");
         Files.write(outputFilePath, filteredCountriesList, StandardOpenOption.APPEND);
+        titleNumber++;
 
         //15V. Any Name Starts with "Z": Write "true" if any country name starts with "Z"; otherwise, "false".
         filteredCountriesList = filteredStream(countries)
@@ -232,10 +251,11 @@ public class ProcessCountries {
                 })
                 .collect(Collectors.toList());
 
-        addTitleAndLinebreak(outputFilePath,"15. Countries that start with \"Z\", and prints true, otherwise \"false\"");
+        addTitleAndLinebreak(outputFilePath, titleNumber,"Countries that start with \"Z\", and prints true, otherwise \"false\"");
         Files.write(outputFilePath, filteredCountriesList, StandardOpenOption.APPEND);
-        
-            //16J. All Names Longer Than 3: Write "true" if all country names are longer than 3 characters;
+        titleNumber++;
+
+        //16J. All Names Longer Than 3: Write "true" if all country names are longer than 3 characters;
             //    otherwise, "false".
 
         final boolean allLongerThanThreeChars;
@@ -243,7 +263,8 @@ public class ProcessCountries {
         allLongerThanThreeChars = filteredStream(countries)
                 .allMatch(country -> country.length() > MAX_COUNTRY_NAME_LENGTH);
 //16. All Country Names Longer Than 3, prints "true" or "false"
-        addTitleAndLinebreak(outputFilePath,"16. All Country Names Longer Than 3 (prints \"true\" or \"false\")");
+        addTitleAndLinebreak(outputFilePath,
+                            titleNumber,"All Country Names Longer Than 3 (prints \"true\" or \"false\")");
         Files.writeString(outputFilePath, "" + allLongerThanThreeChars, StandardOpenOption.APPEND);
     }
 
@@ -253,9 +274,11 @@ public class ProcessCountries {
      * @param titleMessage the title to describe what is happening in the output.
      * @throws java.io.IOException when file cannot be written to.
      */
-    private static void addTitleAndLinebreak(final Path outputFilePath, final String titleMessage) throws java.io.IOException {
+    private static void addTitleAndLinebreak(final Path outputFilePath, final int titleNumber, final String titleMessage) throws java.io.IOException {
         Files.writeString(outputFilePath,
             LINEBREAK_LINE +
+                System.lineSeparator() +
+                titleNumber +
                 System.lineSeparator() +
                 titleMessage +
                 System.lineSeparator() +
@@ -273,7 +296,6 @@ public class ProcessCountries {
         final Stream<String> filteredStream;
         filteredStream = countries.stream()
                                   .filter(country -> (country != null) && (!country.isBlank()));
-
         return filteredStream;
     }
 }
